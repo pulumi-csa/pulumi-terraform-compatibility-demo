@@ -7,6 +7,19 @@ terraform {
       version = ">= 5.0"
     }
   }
+
+  # To use Pulumi as the state backend, uncomment this block and run:
+  #   terraform login tf.pulumi.com
+  #   terraform init -migrate-state
+  #
+  # backend "remote" {
+  #   hostname     = "tf.pulumi.com"
+  #   organization = "Huckstream" #Your organization name
+  
+  #   workspaces {
+  #     name = "terraform_encryptedBucket" #In the format projectName_stackName
+  #   }
+  # }
 }
 
 provider "aws" {
