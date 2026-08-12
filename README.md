@@ -146,3 +146,37 @@ This fires without any changes to the HCL — policy enforcement is applied at t
 ```bash
 pulumi destroy
 ```
+
+---
+
+## Step 5 — Consume the Terraform module as a typed Pulumi SDK
+
+### Show the published module in Pulumi Cloud
+
+Navigate to **Platform → Private components** in the HuckStream org. You'll see `encrypted-s3-bucket-aws` listed with its available versions and auto-generated API docs — inputs, outputs, and types derived directly from the module's HCL variables.
+
+### Install the SDK in the Python project
+
+Switch to `04-pulumi-modules` and install the generated SDK:
+
+```bash
+cd ../04-pulumi-modules
+pulumi package add encrypted-s3-bucket-aws@4.0.0
+pulumi install
+```
+
+This downloads the typed Python SDK for the module and wires it into the project.
+
+### Deploy
+
+```bash
+pulumi up
+```
+
+In the preview you'll see `encrypted-s3-bucket-aws:index:Module` resources — the Terraform module being instantiated as a first-class Pulumi component, with its child AWS resources nested beneath it. The Python code is calling the module with typed inputs, the same infrastructure as the HCL examples but written in Python against a generated SDK.
+
+### Tear down
+
+```bash
+pulumi destroy
+```
