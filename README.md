@@ -9,6 +9,8 @@ This demo shows how Pulumi can enhance an existing Terraform workflow — starti
 | [`01-terraform-module`](./01-terraform-module) | A reusable Terraform module for an encrypted S3 bucket                           |
 | [`02-terraform-code`](./02-terraform-code)     | A root module that calls `01-terraform-module` and provisions real AWS resources |
 | [`03-HCL-language`](./03-HCL-language)         | The same infrastructure as a native Pulumi HCL program                           |
+| [`04-pulumi-modules`](./04-pulumi-modules)     | Python Pulumi program consuming the module via generated typed SDK               |
+| [`upload-module`](./upload-module)             | Go helper for publishing `01-terraform-module` to the Pulumi private registry    |
 
 ## Which approach should you use?
 
