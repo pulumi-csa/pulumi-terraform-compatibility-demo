@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	tfe "github.com/hashicorp/go-tfe"
 )
@@ -48,10 +49,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("resolve path: %v", err)
 	}
+	log.Printf("resolved module path: %s", modulePath)
+
+	token := os.Getenv("PULUMI_ACCESS_TOKEN")
+	if token == "" {
+		log.Fatal("PULUMI_ACCESS_TOKEN is not set")
+	}
+	log.Printf("connecting to https://tf.pulumi.com as org %s", *org)
 
 	client, err := tfe.NewClient(&tfe.Config{
 		Address: "https://tf.pulumi.com",
-		Token:   os.Getenv("PULUMI_ACCESS_TOKEN"),
+		Token:   token,
 	})
 	if err != nil {
 		log.Fatalf("new client: %v", err)
@@ -66,30 +74,55 @@ func main() {
 		Namespace:    *org,
 		RegistryName: tfe.PrivateRegistry,
 	}
+	log.Printf("module ID: org=%s name=%s provider=%s namespace=%s registry=%s",
+		id.Organization, id.Name, id.Provider, id.Namespace, id.RegistryName)
 
-	if _, err := client.RegistryModules.Read(ctx, id); err != nil {
+	existing, err := client.RegistryModules.Read(ctx, id)
+	if err != nil {
 		if !errors.Is(err, tfe.ErrResourceNotFound) {
 			log.Fatalf("read module: %v", err)
 		}
-		log.Printf("creating module %s/%s/%s", *org, *name, *provider)
-		if _, err := client.RegistryModules.Create(ctx, *org, tfe.RegistryModuleCreateOptions{
+		log.Printf("module not found, creating %s/%s/%s", *org, *name, *provider)
+		created, err := client.RegistryModules.Create(ctx, *org, tfe.RegistryModuleCreateOptions{
 			Name:         tfe.String(*name),
 			Provider:     tfe.String(*provider),
 			RegistryName: tfe.PrivateRegistry,
-		}); err != nil {
+		})
+		if err != nil {
 			log.Fatalf("create module: %v", err)
 		}
+		log.Printf("module created: id=%s status=%s", created.ID, created.Status)
+	} else {
+		log.Printf("module already exists: id=%s status=%s", existing.ID, existing.Status)
 	}
 
+	log.Printf("creating version %s", *version)
 	rmv, err := client.RegistryModules.CreateVersion(ctx, id, tfe.RegistryModuleCreateVersionOptions{
 		Version: tfe.String(*version),
 	})
 	if err != nil {
 		log.Fatalf("create version: %v", err)
 	}
+	log.Printf("version created: id=%s status=%s upload-url=%s", rmv.ID, rmv.Status, rmv.Links["upload"])
 
+	log.Printf("uploading from %s", modulePath)
 	if err := client.RegistryModules.Upload(ctx, *rmv, modulePath); err != nil {
-		log.Fatalf("upload module: %v", err)
+		log.Fatalf("upload: %v", err)
+	}
+	log.Printf("upload request sent, polling version status...")
+
+	for i := 0; i < 10; i++ {
+		time.Sleep(2 * time.Second)
+		mod, err := client.RegistryModules.Read(ctx, id)
+		if err != nil {
+			log.Printf("poll %d: read error: %v", i+1, err)
+			continue
+		}
+		for _, v := range mod.VersionStatuses {
+			if v.Version == *version {
+				log.Printf("poll %d: version %s status=%s", i+1, v.Version, v.Status)
+			}
+		}
 	}
 
 	fmt.Printf("uploaded %s/%s/%s@%s\n", *org, *name, *provider, *version)
