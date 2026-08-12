@@ -8,6 +8,16 @@ This demo shows how Pulumi can enhance an existing Terraform workflow — starti
 | ---------------------------------------------- | -------------------------------------------------------------------------------- |
 | [`01-terraform-module`](./01-terraform-module) | A reusable Terraform module for an encrypted S3 bucket                           |
 | [`02-terraform-code`](./02-terraform-code)     | A root module that calls `01-terraform-module` and provisions real AWS resources |
+| [`03-HCL-language`](./03-HCL-language)         | The same infrastructure as a native Pulumi HCL program                           |
+
+## Which approach should you use?
+
+|                    | Terraform backend (`02`)                                                                                 | HCL language (`03`)                                                                                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Best for**       | Lifting existing Terraform state into Pulumi Cloud with zero code changes                                | Reusing existing HCL code as a Pulumi-native program                                                    |
+| **Code changes**   | None — same HCL, same CLI                                                                                | Add `Pulumi.yaml`; swap `terraform` commands for `pulumi`                                               |
+| **State**          | Migrated from local/S3 to Pulumi Cloud                                                                   | Managed by Pulumi Cloud from the start                                                                  |
+| **When to choose** | Team wants Pulumi Cloud visibility and policies immediately, without disrupting their Terraform workflow | Developers comfortable in HCL who want to adopt Pulumi gradually, or want to reuse existing module code |
 
 ---
 
@@ -102,3 +112,35 @@ https://app.pulumi.com/HuckStream/terraform/encryptedBucket
 You'll see two updates — the initial apply and this change. Click into an update to show the diff: which resources were modified, what properties changed, and a full timeline. This is state history that Terraform alone can't give you — no more opaque `.tfstate` files on someone's laptop or in a shared S3 bucket.
 
 ---
+
+## Step 4 — Run the same infrastructure as a native Pulumi HCL program
+
+Switch to `03-HCL-language`. The `.tf` files are nearly identical to `02`, but this is now a Pulumi-native program — no backend configuration needed, and state is managed by Pulumi Cloud automatically.
+
+```bash
+cd ../03-HCL-language
+
+# Fetch provider SDKs
+pulumi install
+
+# Deploy
+pulumi up
+```
+
+### Policy enforcement
+
+Add this stack to the **hcl-language-demo** stack group in Pulumi Cloud, then run `pulumi up`. During the preview, Pulumi automatically evaluates the attached policy pack and surfaces a critical advisory:
+
+```
+⚠️  pulumi-best-practices-aws@v1.4.1
+    - [advisory] [severity: critical]  cloudtrail-enabled
+      CloudTrail must be enabled with at least 1 trail(s). Found 0 trail(s).
+```
+
+This fires without any changes to the HCL — policy enforcement is applied at the org level, across every stack in the group.
+
+### Tear down
+
+```bash
+pulumi destroy
+```
