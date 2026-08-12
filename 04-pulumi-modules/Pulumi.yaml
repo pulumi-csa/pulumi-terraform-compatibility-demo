@@ -1,0 +1,5 @@
+name: pulumi-modules
+runtime: python
+description: Encrypted S3 buckets using the published Pulumi module SDK
+packages:
+  encrypted-s3-bucket-aws: private/huckstream/encrypted-s3-bucket-aws@4.0.0

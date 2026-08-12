@@ -14,3 +14,4 @@ crash.*.log
 *.tfvars.json
 !example.tfvars
 sdks/
+__pycache__/
