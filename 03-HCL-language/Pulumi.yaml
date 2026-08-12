@@ -1,0 +1,3 @@
+name: hcl-encrypted-s3
+runtime: hcl
+description: Encrypted S3 buckets using Pulumi's native HCL language
