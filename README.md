@@ -180,3 +180,25 @@ In the preview you'll see `encrypted-s3-bucket-aws:index:Module` resources — t
 ```bash
 pulumi destroy
 ```
+
+---
+
+## Step 6 — Convert with Neo
+
+The final step is a full migration from Terraform to a native Pulumi Python project, done by Neo in the UI.
+
+### Create a Neo task
+
+In Pulumi Cloud, go to **Neo tasks** and create a new task with these settings:
+
+![Neo task setup](./assets/neo-task-setup.png)
+
+- **Skill:** `/terraform-to-pulumi`
+- **Prompt:** `I'm currently using the terraform state backend with the attached stack. I'd like to migrate to a proper pulumi project in python. The terraform code is in the folder 02-terraform-code, and you should create a PR to add python code that does the same thing and import the resources`
+- **Stack:** `terraform/encryptedBucket`
+- **Repo:** `HuckStream/pulumi-terraform-compatibility-demo`
+- **Mode:** Balanced
+
+Neo will convert the HCL in `02-terraform-code` to Python, import the existing resources from state, and open a PR — no manual conversion required.
+
+View the completed task: https://app.pulumi.com/HuckStream/neo/tasks/85218ac5-d05d-4f76-bcb2-89b03118d8de
