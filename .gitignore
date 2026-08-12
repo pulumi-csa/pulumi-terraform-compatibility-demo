@@ -13,6 +13,4 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 !example.tfvars
-
-# Pulumi HCL generated provider SDKs
 sdks/

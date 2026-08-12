@@ -37,6 +37,7 @@ Run the `upload-module` Go helper from the **repo root** (not from within this d
 cd upload-module && go mod tidy && cd ..
 go -C upload-module run . \
     -org HuckStream \
+    -name encrypted-s3-bucket \
     -provider aws \
     -version 1.0.0 \
     -path ./01-terraform-module
