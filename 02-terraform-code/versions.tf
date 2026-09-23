@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0"
+      version = ">= 6.0"
     }
   }
 
@@ -14,8 +14,8 @@ terraform {
   #
   # backend "remote" {
   #   hostname     = "tf.pulumi.com"
-  #   organization = "Huckstream" #Your organization name
-  
+  #   organization = "elisabeth-demo" #Your organization name
+
   #   workspaces {
   #     name = "terraform_encryptedBucket" #In the format projectName_stackName
   #   }
