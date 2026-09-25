@@ -1,0 +1,11 @@
+name: terraform
+description: Encrypted S3 buckets and KMS key, migrated from Terraform to native Pulumi Python
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: python
